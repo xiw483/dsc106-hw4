@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Fork&Knife</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <link href="https://fonts.googleapis.com/css?family=Montserrat%7CPaytone+One&display=swap" rel="stylesheet"/>
+        <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css" crossorigin="anonymous">
+        <script src="https://code.highcharts.com/highcharts.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+
+
+    
+        <style>
+            .button-success,
+            .button-error{
+                color: white;
+                border-radius: 4px;
+                text-shadow: 0 1px 1px rgba(0,0,0,0.2)
+            }
+            .button-success{
+                background: rgb(28,184,65);
+            }
+
+            .button-error {
+                background: rgb(202, 60, 60);
+            }
+        </style>
+    </head>
+    
+    <body>
+        <main>
+            <img src="kf-logo.png" alt="logo" width="180" height="50">
+            <h1 style="display:inline;"> Global Dashboard </h1>
+        
+            <div class="grid-container">
+                <div class="item1">
+                    <h3 style="font-size:18px">Sales</h3>
+                    <p class="green">$</p>
+                    <p class="blue" id="num_sales"> 0 </p>
+                </div>
+
+                <div class = "item2">
+                    <h3 style="font-size:18px">Knife</h3>
+                    <p class="blue" id="num_knife"> 0 </p>
+                </div>
+
+                <div class = "item3">
+                    <h3 style="font-size:18px">Fork</h3>
+                    <p class="blue" id="num_fork"> 0 </p>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="graphs-container">
+                <figure class="stacked_bar_chart">
+                    <div id="bar_container" style="width: 100%; height: 100%;"></div>
+                </figure> 
+
+                <figure class="pie_chart">
+                    <div id="pie_container" style="width: 100%; height: 100%;"></div>
+                </figure>  
+            </div>
+
+            <section>
+                <table id="order_tbl">
+                    <caption>Order History</caption>
+
+                    <thead>
+                        <tr>
+                            <th rowspan="2" colspan="1" id="id"> ID# </th>
+                            <th rowspan="2" colspan="1"> Date </th>
+                            <th rowspan="1" colspan="2"> Quantity </th>
+                            <th rowspan="2" colspan="1"> Total </th>
+                            <th rowspan="2" colspan="1"> Payment </th>
+                        </tr>
+
+                        <tr>
+                            <th rowspan="1" colspan="1"> Knife </th> 
+                            <th rowspan="1" colspan="1"> Fork </th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody></tbody>
+
+                    <tfoot>
+                        <tr>
+                            <td colspan="6">&copy; 2020 K&F Worldwide. </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </section>
+
+            <section>
+                <br>
+                <details>
+                    <summary id="order_form">Order Form</summary>
+                    <hr>
+
+                    <form class="pure-form">
+                        <fieldset>
+                            <div>
+                                <label>Knife</label>
+                                <input type="number" id='knife_input' value=0 min=0 onchange="update_form()" />
+                                @ <input type="text" id='knife_price' readonly="" />
+                                =$ <input type="text" id="knife_total_price" value=0.00 readonly="" />
+                            </div>
+                            
+                            <br>
+
+                            <div>
+                                <label>Fork</label> 
+                                <input type="number" id='fork_input' value=0 min=0 onchange="update_form()" />
+                                @ <input type="number" id='fork_price' readonly="" />
+                                =$ <input type="number" id="fork_total_price" value=0.00 readonly="" />
+                            </div>
+                                                        
+                            <br>
+
+                            <div>
+                                <label>Total $</label>
+                                <input type="number" id="total_price" value=0.00 readonly="" />
+                            </div>
+
+                            <div> 
+                                <label for="payment">Payment</label>
+                                <br>
+                                <select multiple id="payment" onchange="check_form()">
+                                    <option value="Visa">Visa</option>
+                                    <option value="Mastercard">Mastercard</option>
+                                    <option value="Paypal">Paypal</option>
+                                </select>
+                            </div>
+
+                            <br>
+
+                            <div>
+                                <button class="button-error pure-button" type="button" onclick="clear_field()">Cancel</button>
+                                <button class="button-success pure-button" id='order_btn' type="button" disabled='disabled' onclick="order()">Order</button>
+                            </div>
+                        </fieldset>
+                    </form>
+                    
+                </details>
+            </section>
+
+            <script src="highchart_chart.js"></script>
+
+        </main>
+    </body>
+    
+    
+</html>

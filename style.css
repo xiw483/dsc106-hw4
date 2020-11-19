@@ -1,0 +1,87 @@
+div.item1 {grid-area: left;}
+div.item2 {grid-area: middle;}
+div.item3 {
+    grid-area: right; 
+    text-align: center;
+}
+
+div.grid-container {
+    display: grid;
+    grid-template-areas: 'left middle right';
+    text-align: center;
+}
+
+div.graphs-container {
+    display: grid;
+    grid-template-areas: 'left right';
+    text-align: center;
+}
+
+p.blue {
+    color: blue;
+    display: inline;
+    font-size: 140%;
+}
+
+p.green {
+    color: green;
+    display: inline;
+    font-size: 140%;
+}
+
+img.chart {
+    width: 100%;
+    height: 100%;
+}
+
+iframe {
+    height: 100%;
+    width: 100%;
+    border: none;
+}
+
+figcaption{
+    text-align: center;
+    font-size: 80%;
+}
+
+a {
+    font-size: 12px;
+}
+
+table, th, td {
+    border:1px solid black;
+    text-align: center;
+    margin: 1%;
+    width: 50%;
+    font-family: 'Montserrat', sans-serif;
+}
+
+td {
+    padding-left: 2ch;
+    padding-right: 2ch;
+    text-align: center;
+}
+
+.id, tfoot, td:nth-child(1) {
+    background-color: lightgray;
+    color: white
+}
+
+h1, h3 {
+    font-family: 'Paytone One', 'sans-serif';
+}
+
+a, figcaption, label, p, li, footer {
+    font-family: 'Montserrat', sans-serif;
+}
+
+main {
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+ul::before{
+    color: red;
+}
+
