@@ -1,6 +1,8 @@
 const KNIFE_PRICE = 6.25;
 const FORK_PRICE = 4.99;
 const ZERO_FORMAT = '0.00';
+var global_knife_input = 0;
+var global_fork_input = 0;
 var id = 1;
 
 document.getElementById("knife_price").value = KNIFE_PRICE;
@@ -10,7 +12,7 @@ var num_sales = 0.00;
 var num_knife = 0;
 var num_fork = 0;
 
-localStorage.setItem("num_fork",num_fork);
+localStorage.setItem("num_fork", num_fork);
 localStorage.setItem("num_knife", num_knife)
 
 var first_two = generateEntries();
@@ -19,21 +21,35 @@ let store = {
     orderHistory: []
 };
 
-function getPct () {
+if (order_history == null) {
+    insert_data(first_two[0]);
+    insert_data(first_two[1]);
+}
+else {
+    for (let i = 0; i < order_history.length / 5; i += 5) {
+        insert_data(order_history.split(',').slice(i, i + 5));
+    }
+}
+
+function getPct() {
     f = localStorage.getItem("num_fork");
     k = localStorage.getItem("num_knife");
-    return [f/(f+k), k/(f+k)]
+    if (f==0 & k== 0) {
+        return [1,1]
+    }
+    else {
+        return [f / (f + k), k / (f + k)]
+    }
 }
 
 
 var global_pie;
 renderPieChart();
 
-function renderPieChart () {
+function renderPieChart() {
     var pie = Highcharts.chart('pie_container', {
         chart: { type: 'pie' },
         title: { text: 'Sales Ratio for Forks and Knives Overall' },
-        
         plotOptions: {
             pie: {
                 dataLabels: {
@@ -54,64 +70,75 @@ function renderPieChart () {
             colorByPoint: true,
             data: [{
                 name: 'Fork',
-                data: 0.375
+                y: getPct()[0]
             }, {
                 name: 'Knife',
-                data: 0.625
+                y: getPct()[1]
             }]
         }]
     });
-    global_pie=pie;
+    global_pie = pie;
 }
 
-document.getElementById("order_btn").addEventListener('click', function(event) {
-    global_pie.series[0].setData([{y:getPct()[0]}, {y:getPct()[1]}])
+document.getElementById("order_btn").addEventListener('click', function (event) {
+    global_pie.series[0].setData([{ y: getPct()[0] }, { y: getPct()[1] }])
 })
 
 var globalBar;
 renderBarChart();
 
+function pctPerSale() {
+    const f = Number(global_fork_input);
+    const k = Number(global_knife_input);
+    return [f / (f + k), k / (f + k)]
+}
+
 function renderBarChart() {
     var bar = Highcharts.chart('bar_container', {
-        chart: {
-            type: 'bar'
-        },
-        title: {
-            text: 'Number of Forks and Knives Sold per Order'
-        },
+        chart: { type: 'bar' },
+        title: { text: 'Number of Forks and Knives Sold per Order' },
         xAxis: {
-            categories: ['1', '2']
+            categories: ['1', '2'],
+            title: { text: 'Sales ID' }
         },
         yAxis: {
             min: 0,
-            title: {
-                text: 'Total Sales'
-            }
+            max: 1,
+            title: { text: 'Percentage Sales of Knives and Forks' }
         },
-        legend: {
-            reversed: true
-        },
+        legend: { reversed: true },
         plotOptions: {
-            series: {
-                stacking: 'normal'
-            }
+            series: { 
+                stacking: 'normal' ,
+                dataLabels: {
+                    enabled: true,
+                    inside: true,
+                    color: 'white',
+                    format: '<b>{point.name}</b><br>{point.percentage:.1f} %',
+                    distance: -50,
+                    filter: {
+                        property: 'percentage',
+                        operator: '>',
+                        value: 4
+                    }
+                }
+            },
+            
         },
         series: [{
             name: 'Knife',
-            data: [1, 2]
+            data: [1 / 2, 2 / 6]
         }, {
             name: 'Fork',
-            data: [1, 4]
+            data: [1 / 2, 4 / 6]
         }]
     });
     globalBar = bar;
 }
-document.getElementById("order_btn").addEventListener('click', function(event) {
-    globalBar.xAxis[0].categories.push(id)
-    globalBar.series[0].addPoint([
-        document.getElementById("knife_input"),
-        document.getElementById("fork_input")
-    ])
+document.getElementById("order_btn").addEventListener('click', function (event) {
+    globalBar.xAxis[0].categories.push(id-1)
+    globalBar.series[0].addPoint(pctPerSale()[1]);
+    globalBar.series[1].addPoint(pctPerSale()[0]);
 })
 
 
@@ -186,6 +213,9 @@ function order() {
     const knife_input = document.getElementById("knife_input").value;
     const fork_input = document.getElementById("fork_input").value;
 
+    global_knife_input = knife_input;
+    global_fork_input = fork_input;
+
     var payment_method = document.getElementById("payment").value;
 
     arr[0] = order_id;
@@ -210,14 +240,6 @@ function clear_field() {
 
 var order_history = localStorage.getItem("order_history");
 
-if (order_history == null) {
-    insert_data(first_two[0]);
-    insert_data(first_two[1]);
-}
-else {
-    for (let i = 0; i < order_history.length / 5; i += 5) {
-        insert_data(order_history.split(',').slice(i, i + 5));
-    }
-}
+
 
 
