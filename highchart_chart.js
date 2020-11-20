@@ -38,7 +38,7 @@ function getPct() {
         return [1,1]
     }
     else {
-        return [f / (f + k), k / (f + k)]
+        return [Number(f) / (Number(f) + Number(k)), Number(k) / (Number(f) + Number(k))]
     }
 }
 
@@ -90,8 +90,7 @@ renderBarChart();
 function pctPerSale() {
     const f = Number(global_fork_input);
     const k = Number(global_knife_input);
-    return [f / (f + k), k / (f + k)]
-}
+    return [Number(f) / (Number(f) + Number(k)), Number(k) / (Number(f) + Number(k))]
 
 function renderBarChart() {
     var bar = Highcharts.chart('bar_container', {
@@ -181,7 +180,6 @@ function insert_data(arr) {
     localStorage.setItem('order_id', id);
     localStorage.setItem('num_fork', num_fork)
     localStorage.setItem('num_knife', num_knife)
-    localStorage.setItem('num_sales', num_sales)
 }
 
 function check_form() {
