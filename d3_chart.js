@@ -1,6 +1,8 @@
 const KNIFE_PRICE = 6.25;
 const FORK_PRICE = 4.99;
 const ZERO_FORMAT = '0.00';
+var global_knife_input = 0;
+var global_fork_input = 0;
 var id = 1;
 
 document.getElementById("knife_price").value = KNIFE_PRICE;
@@ -37,6 +39,12 @@ function getPct() {
     }
 }
 
+function pctPerSale() {
+    const f = Number(global_fork_input);
+    const k = Number(global_knife_input);
+    return [Number(f) / (Number(f) + Number(k)), Number(k) / (Number(f) + Number(k))]
+}
+
 function updatePie() {
 
     document.getElementById("pie").innerHTML = ""
@@ -44,18 +52,16 @@ function updatePie() {
     var height = parseInt(d3.select('#pie').style('height'))
     var width = parseInt(d3.select('#pie').style('width'))
     var radius = Math.min(width, height) / 2
-
     var color = d3.scaleOrdinal(['#206db0', '#ff6361']);
     var data = [getPct()[0], getPct()[1]];
 
     var svgPie = d3.select("#pie")
         .attr("width", '100%')
         .attr("height", "100%")
-        .attr('viewBox', '0 0 ' + width + ' ' + height)
+        .attr('viewBox', [0, 0, width, height])
         .attr('preserveAspectRatio', 'xMinYMin')
 
-    var g = svgPie
-        .append("g")
+    var g = svgPie.append("g")
         .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
 
     var pie = d3.pie();
@@ -80,25 +86,25 @@ function updatePie() {
     var size = 20
 
     arcs.append("text")
-        .attr("transform", function(d) {
-            d.innerRadius=0;
-            d.outerRadius=radius;
-            return "translate(" +arc.centroid(d) +")"
+        .attr("transform", function (d) {
+            d.innerRadius = 0;
+            d.outerRadius = radius;
+            return "translate(" + arc.centroid(d) + ")"
         })
         .attr("text-anchor", "middle")
-        .text(function(d,i) {
+        .text(function (d, i) {
             return data[i].toFixed(2)
         })
-    
+
     svgPie.append("circle")
         .attr("cx", 50)
         .attr("cy", 180)
-        .attr("r",6)
+        .attr("r", 6)
         .style("fill", '#ff6361')
     svgPie.append("circle")
         .attr("cx", 50)
         .attr("cy", 160)
-        .attr("r",6)
+        .attr("r", 6)
         .style("fill", '#206db0')
     svgPie.append("text")
         .attr("x", 60)
@@ -106,15 +112,156 @@ function updatePie() {
         .text("Knife")
         .style("fill", '#ff6361')
         .style("font-size", "12px")
-        .attr("alignment-baseline","middle")
+        .attr("alignment-baseline", "middle")
     svgPie.append("text")
         .attr("x", 60)
         .attr("y", 160)
         .text("Fork")
         .style("fill", '#206db0')
         .style("font-size", "12px")
-        .attr("alignment-baseline","middle")
+        .attr("alignment-baseline", "middle")
 }
+
+if (order_history == null) {
+    insert_data(first_two[0]);
+    insert_data(first_two[1]);
+}
+else {
+    for (let i = 0; i < order_history.length / 5; i += 5) {
+        insert_data(order_history.split(',').slice(i, i + 5));
+    }
+}
+
+function createDataset() {
+    var tbl = document.getElementById("table")
+    var nrow = tbl.getElementsByTagName("tr").length
+    var dataset = []
+    for (var i = 0; i < nrow; i++) {
+        var id = tbl.rows[i].cells[0].innerHTML
+        var k = Number(tbl.rows[i].cells[2].innerHTML)
+        var f = Number(tbl.rows[i].cells[3].innerHTML)
+
+        dataset.push({ "salesID": id, "fork": (f / (f + k)).toFixed(2), "knife": (k / (f + k)).toFixed(2) })
+    }
+    return dataset
+}
+
+function updateBar() {
+    document.getElementById("bar").innerHTML = ""
+
+    var margin = { top: 20, right: 50, bottom: 50, left: 30 }
+    var height = parseInt(d3.select('#bar').style('height')) - margin.top - margin.bottom
+    var width = parseInt(d3.select('#bar').style('width')) - margin.left - margin.right
+
+    var xScale = d3.scaleBand()
+        .rangeRound([0, width])
+        .padding(0.5)
+    var yScale = d3.scaleLinear()
+        .rangeRound([height, 30])
+
+    var color = ['#206db0', '#ff6361'];
+
+    var xAxis = d3.axisBottom()
+        .scale(xScale)
+    var yAxis = d3.axisLeft()
+        .scale(yScale)
+
+    var svgBar = d3.select("#bar")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("viewBox", [-40, 0, width, height])
+        .attr("preserveAspectRatio", "xMinYMin")
+
+    var g = svgBar.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var data = createDataset()
+    var keys = ['fork', 'knife'];
+    var stack = d3.stack()
+        .keys(keys)
+
+    var series = stack(data)
+    data.sort(function (a, b) { return b.total - a.total; });
+    xScale.domain(data.map(function (d) { return d.salesID }))
+    yScale.domain([0, 1]).nice()
+
+    var layers = svgBar.selectAll(".stack")
+        .data(series)
+        .enter()
+        .append("g")
+        .attr("class", "stack")
+        .attr("fill", function (d, i) {
+            return color[i];
+        });
+
+    var rect = layers.selectAll("rect")
+        .data(function (d) { return d; })
+        .enter()
+        .append("rect")
+        .attr("x", function (d) {
+            return xScale(d.data.salesID)
+        })
+        .attr("y", function (d) {
+            return yScale(d[1]);
+        })
+        .attr("height", function (d) {
+            return yScale(d[0]) - yScale(d[1]);
+        })
+        .attr("width", xScale.bandwidth())
+
+    svgBar.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+    svgBar.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(0,0)")
+        .call(yAxis)
+
+    svgBar.append("text")
+        .attr("transform", "translate(" + (width / 2) + "," + (height+15) + ")")
+        .style("text-anchor", "middle")
+        .attr("font-size", "11px")
+        .text("salesID")
+    svgBar.append("text")
+        .attr("transform", function (d) {
+            return "rotate(-90)";
+        })
+        .attr("y", -margin.left-10)
+        .attr("x", -height / 2)
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Percentage Purchased")
+        .attr("font-size", "11px")
+
+    svgBar.append("circle")
+        .attr("cx", 10)
+        .attr("cy", 160)
+        .attr("r", 6)
+        .style("fill", '#ff6361')
+    svgBar.append("circle")
+        .attr("cx", 10)
+        .attr("cy", 140)
+        .attr("r", 6)
+        .style("fill", '#206db0')
+    svgBar.append("text")
+        .attr("x", 20)
+        .attr("y", 160)
+        .text("Knife")
+        .style("fill", '#ff6361')
+        .style("font-size", "11px")
+        .attr("alignment-baseline", "middle")
+    svgBar.append("text")
+        .attr("x", 20)
+        .attr("y", 140)
+        .text("Fork")
+        .style("fill", '#206db0')
+        .style("font-size", "11px")
+        .attr("alignment-baseline", "middle")
+
+
+}
+
 
 function tot_price(arr) {
     return (arr[2] * KNIFE_PRICE + arr[3] * FORK_PRICE).toFixed(2);
@@ -147,6 +294,7 @@ function insert_data(arr) {
     localStorage.setItem('num_knife', num_knife)
 
     updatePie();
+    updateBar();
 }
 
 function check_form() {
@@ -177,6 +325,8 @@ function order() {
 
     const knife_input = document.getElementById("knife_input").value;
     const fork_input = document.getElementById("fork_input").value;
+    global_knife_input = knife_input;
+    global_fork_input = fork_input;
 
     var payment_method = document.getElementById("payment").value;
 
@@ -202,14 +352,6 @@ function clear_field() {
 
 var order_history = localStorage.getItem("order_history");
 
-if (order_history == null) {
-    insert_data(first_two[0]);
-    insert_data(first_two[1]);
-}
-else {
-    for (let i = 0; i < order_history.length / 5; i += 5) {
-        insert_data(order_history.split(',').slice(i, i + 5));
-    }
-}
+
 
 
