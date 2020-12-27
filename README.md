@@ -1,4 +1,6 @@
 # dsc106-hw4
+This hw assignment aims to design a basic website that tracks customers' order history. 
+
 
 Questions:
 
